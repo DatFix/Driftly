@@ -1,0 +1,9 @@
+export * as CategoryApis from './auth/categories.api';
+export * as AuthApis from './auth/auth.api';
+export * as RoleApis from './auth/role.api';
+export * as AdminApis from './auth/admin.api';
+export * as UserApis from './auth/user.api';
+export * as PostApis from './post.api';
+export * as CommentApis from './comment.api';
+export * as OthersApis from './others.api';
+export * as HashtagApis from './hashtag.api';
