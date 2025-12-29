@@ -3,6 +3,9 @@
 import { cookies } from 'next/headers'
 import { encrypt, decrypt } from '@/lib/session'
 
+const isHttps =
+  process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https://')
+
 export async function createSession(userId: string, userData: any) {
   const sessionData = {
     userId,
@@ -14,7 +17,7 @@ export async function createSession(userId: string, userData: any) {
   const cookieStore = await cookies()
   cookieStore.set('session', encryptedSession, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHttps,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
     sameSite: 'lax',
@@ -49,7 +52,7 @@ export async function createUserSession(userId: string, userData: any) {
   const cookieStore = await cookies()
   cookieStore.set('user_session', encryptedSession, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHttps,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
     sameSite: 'lax',
@@ -89,7 +92,7 @@ export async function editUserSession(updatedData: Partial<any>) {
   // Ghi lại cookie với cùng tên, sẽ ghi đè nhưng thời gian vẫn giữ nguyên cookie nếu không đặt maxAge
   cookieStore.set('user_session', encryptedSession, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHttps,
     path: '/',
     sameSite: 'lax',
     // không đặt maxAge -> trình duyệt sẽ dùng cookie cũ, vẫn còn thời gian còn lại
