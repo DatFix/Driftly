@@ -73,7 +73,7 @@ const renderMedia = (item: IVideo, i: number, isSingle?: boolean) => {
   if (item.type === "video") {
     return (
       <video
-        autoPlay={true}
+        autoPlay={false}
         width={item.width}
         height={item.height}
         key={i}

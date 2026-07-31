@@ -29,7 +29,7 @@ export default async function RootLayout({
   await InitAdmin();
   return (
     <html lang="en" className={`${montserrat.variable}`}>
-      <body className="antialiased font-montserrat bg-color-background">
+      <body className="antialiased font-montserrat bg-color-background" suppressHydrationWarning>
         <ThemeProvider attribute="data-theme" defaultTheme="light">
           <RootContent>{children}</RootContent>
         </ThemeProvider>

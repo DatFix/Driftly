@@ -24,8 +24,12 @@ export default function BaseEmoji({ children, onEmojiClick }: BaseEmojiProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="p-0 bg-transparent border-0" align="start">
+      <PopoverContent
+        className="p-0 translate-y-20 -translate-x-10 bg-transparent shadow-none border-0"
+        align="start"
+      >
         <EmojiPicker
+          className="scale-[0.7]"
           onEmojiClick={handleEmojiClick}
           theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
         />
