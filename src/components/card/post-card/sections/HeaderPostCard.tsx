@@ -41,7 +41,9 @@ export default function HeaderPostCard({ item }: { item: IPost }) {
     useEditPost();
 
   const handleCopyLink = async (content: string) => {
-    navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_BASE_URL}/${content}`);
+    navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/${content}`,
+    );
     showSuccessToast("Đã sao chép liên kết vào clipboard!");
   };
 
@@ -57,7 +59,11 @@ export default function HeaderPostCard({ item }: { item: IPost }) {
               onClick={() => router.push(`/profile/${item.authorData?.id}`)}
             >
               <BaseAvatar
-                url={(item.authorData?.avatar as IImage)?.url}
+                url={
+                  item.isFake
+                    ? (item.authorData?.avatar as any)
+                    : (item.authorData?.avatar as IImage)?.url
+                }
                 name={item.authorData?.username}
               />
             </div>
@@ -67,7 +73,7 @@ export default function HeaderPostCard({ item }: { item: IPost }) {
                   {item?.authorData?.username}
                 </p>
                 {item?.authorData?.followers?.some(
-                  (followerId) => followerId === user?.id
+                  (followerId) => followerId === user?.id,
                 ) && (
                   <div className="flex items-center justify-center">
                     <Dot className="text-(--color-text)" size={15} />
@@ -164,7 +170,11 @@ const BaseUserInfoCard = ({ item, user }: { item: IPost; user: IUser }) => {
           onClick={() => router.push(`/profile/${item.authorData?.id}`)}
         >
           <BaseAvatar
-            url={(item.authorData?.avatar as IImage)?.url}
+            url={
+              item.isFake
+                ? (item.authorData?.avatar as any)
+                : (item.authorData?.avatar as IImage)?.url
+            }
             name={item.authorData?.username}
             size={60}
           />
@@ -176,7 +186,7 @@ const BaseUserInfoCard = ({ item, user }: { item: IPost; user: IUser }) => {
               {item?.authorData?.username}
             </h3>
             {item?.authorData?.followers?.some(
-              (followerId) => followerId === user?.id
+              (followerId) => followerId === user?.id,
             ) && (
               <div className="flex items-center justify-center">
                 <Dot className="text-(--color-text)" size={15} />
@@ -199,7 +209,7 @@ const BaseUserInfoCard = ({ item, user }: { item: IPost; user: IUser }) => {
             ) : (
               <div className="flex items-center justify-start gap-1">
                 {item?.authorData?.followers?.some(
-                  (followerId) => followerId !== user?.id
+                  (followerId) => followerId !== user?.id,
                 ) && (
                   <button className="px-2 py-0.5 text-sm shadow-md cursor-pointer hover:shadow-none text-white bg-(--color-primary) rounded-[3px] w-fit flex items-center justify-center gap-1">
                     <FollowIcon width={18} height={18} color="#FFF" />

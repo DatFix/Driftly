@@ -37,4 +37,5 @@ export interface IPost extends IBase {
     comments?: IComment[]
     authorData?: IUser | null;
     hashtags?: string[];
+    isFake?: boolean; // Dùng để phân biệt bài giả (tạo bằng Faker) với bài thật (lấy từ Firestore)
 }

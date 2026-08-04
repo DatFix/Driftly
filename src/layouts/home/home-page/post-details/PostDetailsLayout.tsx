@@ -25,13 +25,27 @@ export default function PostDetailsLayout({ item }: { item: IPost }) {
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
+
   const handleBack = () => {
-    if (window.history.length !== 2) {
-      router.back(); // có history => quay lại
+    const hasInternalHistory =
+      sessionStorage.getItem("hasInternalHistory") === "true";
+
+    if (hasInternalHistory) {
+      router.back();
     } else {
-      router.push(`${process.env.NEXT_PUBLIC_BASE_URL}`); // không có => về trang chủ
+      router.push("/");
     }
   };
+
+  if (!item) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center gap-2 bg-(--color-background) z-10">
+        <p className="text-lg font-medium text-(--color-text)">
+          Không tìm thấy bài viết
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col overflow-y-auto md:overflow-hidden md:flex-row items-start justify-between gap-0 md:gap-5 mx-auto fixed inset-0 bg-(--color-background) z-10 transition-opacity duration-600">

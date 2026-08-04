@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import RootContent from "./RootContent";
 import { InitAdmin } from "@/api/auth/admin.api";
 import { Metadata } from "next";
+import { NavigationTracker } from "@/components/providers/NavigationTracker";
 
 const montserrat = Inter({
   subsets: ["latin"],
@@ -27,11 +28,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   await InitAdmin();
+
   return (
-    <html lang="en" className={`${montserrat.variable}`}>
-      <body className="antialiased font-montserrat bg-color-background" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${montserrat.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className="antialiased font-montserrat bg-color-background"
+        suppressHydrationWarning
+      >
         <ThemeProvider attribute="data-theme" defaultTheme="light">
-          <RootContent>{children}</RootContent>
+          <NavigationTracker>
+            <RootContent>{children}</RootContent>
+          </NavigationTracker>
         </ThemeProvider>
       </body>
     </html>

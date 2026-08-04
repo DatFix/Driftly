@@ -317,18 +317,18 @@ export default function RightLoginLayout() {
 
         <div className="h-8 flex flex-1 mx-5 px-2 bg-(--color-card) rounded-md items-center justify-start">
           <p className="text-(--color-text) text-sm font-medium">
-            https://driftly.com
+            https://driftly.hidras.xyz
           </p>
         </div>
       </div>
-      <div className="grid lg:grid-cols-2 w-full h-screen gap-5 px-3 overflow-hidden">
+      <div className="grid lg:grid-cols-2 w-full h-screen gap-5 px-3 overflow-hidden pointer-events-none select-none">
         {/* CỘT TRÁI */}
         <div className="relative overflow-hidden h-full">
           <div className="marquee-vertical-up flex flex-col w-full gap-5 card-shadow">
             {[...mockPosts.slice(0, 6), ...mockPosts.slice(0, 10)].map(
               (item, i) => (
                 <PostCard key={i} item={item as any} />
-              )
+              ),
             )}
           </div>
         </div>
@@ -339,7 +339,7 @@ export default function RightLoginLayout() {
             {[...mockPosts.slice(7, 13), ...mockPosts.slice(10, 20)].map(
               (item, i) => (
                 <PostCard key={i} item={item as any} />
-              )
+              ),
             )}
           </div>
         </div>

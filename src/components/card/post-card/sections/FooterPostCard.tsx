@@ -1,3 +1,5 @@
+"use client";
+
 import { PostApis } from "@/api";
 import {
   CommentIcon,
@@ -8,36 +10,75 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { IPost } from "@/interfaces/public/IPost.interface";
 import { formatCount } from "@/utils/formatCount.utils";
-import { showWarningToast } from "@/utils/toast.utils";
+import { showSuccessToast, showWarningToast } from "@/utils/toast.utils";
+import { isFakePostId } from "@/utils/fake-post.util";
 import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 export default function FooterPostCard({ item }: { item: IPost }) {
   const { user } = useAuth();
   const router = useRouter();
+
+  const isFakePost = isFakePostId(String(item.id));
+
+  // Bài thật: nguồn dữ liệu là mảng `likes` (Firestore không lưu likeCount).
+  // Bài fake: không có mảng likes thật, chỉ có con số `likeCount` ảo.
+  const [likes, setLikes] = useState(item.likes ?? []);
+  const [fakeLiked, setFakeLiked] = useState(false);
+  const [fakeLikeCount, setFakeLikeCount] = useState(item.likeCount ?? 0);
+
+  useEffect(() => {
+    if (isFakePost) {
+      setFakeLikeCount(item.likeCount ?? 0);
+      setFakeLiked(false);
+    } else {
+      setLikes(item.likes ?? []);
+    }
+  }, [item.id, item.likes, item.likeCount, isFakePost]);
+
+  const liked = isFakePost
+    ? fakeLiked
+    : likes.some((l) => String(l.id) === String(user?.id));
+  const likeCount = isFakePost ? fakeLikeCount : likes.length;
 
   const hanldleLikePost = async () => {
     if (!user) {
       showWarningToast("Đăng nhập để tham gia tương tác với bài viết");
       return;
     }
+
+    const nextLiked = !liked;
+
+    if (isFakePost) {
+      setFakeLiked(nextLiked);
+      setFakeLikeCount((c) => c + (nextLiked ? 1 : -1));
+      const sound = new Audio("/sounds/like-sound.wav");
+      sound.play();
+      return;
+    }
+
+    const prevLikes = likes;
+    setLikes(
+      nextLiked
+        ? [...likes, user]
+        : likes.filter((l) => String(l.id) !== String(user.id)),
+    );
+
     try {
       await PostApis.likePost(String(item?.id), String(user?.id));
       const sound = new Audio("/sounds/like-sound.wav");
       sound.play();
-      console.log("Like thành công bài viết", item?.id);
     } catch (error) {
+      setLikes(prevLikes);
       console.log("Error", error);
     }
   };
 
   const handleViewPost = async () => {
     await router.push(`/post/${item.id}`);
-    if (!user) return;
-    await PostApis.updateViewCount(item?.id!);
+    if (!user || isFakePost) return;
+    await PostApis.updateViewCount(item.id as string);
   };
-
-  const liked = item.likes?.some((l) => l.id === user?.id);
 
   return (
     <div className="flex flex-col px-1 md:px-[15px] pt-2.5 pb-2 w-full">
@@ -49,17 +90,13 @@ export default function FooterPostCard({ item }: { item: IPost }) {
             </div>
           </div>
           <p className="text-sm text-(--color-text)">
-            {item.likeCount === 0
-              ? liked && item.likes
-                ? item.likes?.length > 1
-                  ? item.likes.includes(user?.id as any)
-                    ? `Bạn và ${formatCount(
-                        (item.likes?.length as any) - 1
-                      )} người khác`
-                    : formatCount(item.likes?.length) ?? 0
+            {likeCount === 0
+              ? 0
+              : liked
+                ? likeCount > 1
+                  ? `Bạn và ${formatCount(likeCount - 1)} người khác`
                   : "Bạn là người thích đầu tiên"
-                : formatCount(item.likes?.length) ?? 0
-              : formatCount(item.likeCount)}
+                : formatCount(likeCount)}
           </p>
         </div>
 
@@ -93,6 +130,12 @@ export default function FooterPostCard({ item }: { item: IPost }) {
         <ActionBtn
           name="Chia sẻ"
           icon={<LinkIcon width={27} height={27} stroke={1.5} />}
+          onClick={() => {
+            navigator.clipboard.writeText(
+              `${window.location.origin}/post/${item.id}`,
+            );
+            showSuccessToast("Đã sao chép liên kết bài viết vào clipboard");
+          }}
         />
       </div>
     </div>

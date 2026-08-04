@@ -8,7 +8,9 @@ export default function NomalPostCard({ item }: { item: IPost }) {
   const router = useRouter();
 
   const handleViewPost = async () => {
-    await PostApis.updateViewCount(item?.id!);
+    if (item.id && !item.id.includes("-")) {
+      await PostApis.updateViewCount(item.id);
+    }
     await router.push(`/post/${item.id}`);
   };
 
@@ -38,9 +40,9 @@ export default function NomalPostCard({ item }: { item: IPost }) {
           {files.length === 3 && (
             <div className="flex gap-1 w-full">
               <div className="w-1/2 h-[400px]">{renderMedia(files[0], 0)}</div>
-              <div className="grid grid-cols-1 gap-2 w-1/2">
+              <div className="grid grid-cols-1 gap-1 w-1/2">
                 {files.slice(1).map((item, i) => (
-                  <div key={i + 1} className="h-[196px]">
+                  <div key={i + 1} className="h-[198px]">
                     {renderMedia(item, i + 1)}
                   </div>
                 ))}
@@ -55,7 +57,7 @@ export default function NomalPostCard({ item }: { item: IPost }) {
                 <div key={i} className="relative w-full h-[250px]">
                   {renderMedia(item, i)}
                   {i === 3 && files.length > 4 && (
-                    <div className="absolute inset-0 bg-black/50 text-white text-3xl font-semibold flex items-center justify-center rounded-lg">
+                    <div className="absolute inset-0 bg-black/50 text-white text-3xl font-semibold flex items-center justify-center">
                       +{files.length - 4}
                     </div>
                   )}

@@ -77,7 +77,7 @@ export default function ShareStatusModal() {
   if (!user) return;
 
   return (
-    <div className="mb-5">
+    <div className="md:mb-5 mb-0.5">
       <BaseCard radius={5}>
         <div className="flex flex-row items-center justify-between gap-2">
           <div
@@ -133,7 +133,7 @@ export default function ShareStatusModal() {
             setOpenWithImages(value);
             if (!value) {
               reset();
-            }
+            } 
           }}
           title="Tạo bài viết"
         >

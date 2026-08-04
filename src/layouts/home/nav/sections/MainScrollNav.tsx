@@ -16,7 +16,7 @@ import LogoBrand from "../commons/LogoBrand";
 export default function MainScrollNav() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-(--color-card) py-5 fixed top-0 left-0 w-full z-10">
+    <div className="bg-(--color-card) md:py-5 py-2 pr-3 md:pr-0 top-0 left-0 w-full z-10">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="items-center justify-start gap-2 hidden md:flex">
           <LinkItem href="#" content={<TiwtterIcon width={20} height={20} />} />
@@ -34,7 +34,9 @@ export default function MainScrollNav() {
           />
         </div>
 
-        <LogoBrand />
+        <div className="scale-75 md:scale-100">
+          <LogoBrand />
+        </div>
 
         <div>
           <div className="cursor-pointer" onClick={() => setOpen(true)}>

@@ -9,6 +9,7 @@ import {
   LocationIcon,
 } from "@/components/icons/BaseIcon";
 import ShareStatusModal from "@/components/others/share-status/ShareStatusModal";
+import PostCardSekeleton from "@/components/skeleton/PostCardSekeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -82,7 +83,8 @@ export default function MainProfileLayout({
           {posts && posts.length > 0 ? (
             posts.map((item) => <PostCard item={item} key={item.id} />)
           ) : (
-            <p className="text-(--color-text) mt-5">Chưa có bài viết nào.</p>
+            // <p className="text-(--color-text) mt-5">Chưa có bài viết nào.</p>
+            <PostCardSekeleton />
           )}
         </div>
       </div>

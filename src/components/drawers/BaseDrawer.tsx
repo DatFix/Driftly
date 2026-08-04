@@ -1,7 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { CloseIcon } from "../icons/BaseIcon";
 
@@ -11,8 +10,8 @@ interface BaseDrawerProps {
   title?: string;
   children?: React.ReactNode;
   placement?: "left" | "right" | "top" | "bottom";
-  width?: string; // ví dụ "400px"
-  height?: string; // nếu là top/bottom
+  width?: string;
+  height?: string;
 }
 
 export default function BaseDrawer({
@@ -21,17 +20,28 @@ export default function BaseDrawer({
   title,
   children,
   placement = "right",
-  width = "400px",
+  width = "auto",
   height = "300px",
 }: BaseDrawerProps) {
-  // Xử lý ESC để đóng Drawer
+  const [mounted, setMounted] = useState(false);
+
+  // Hook 1 — luôn được gọi ở mọi lần render, không đặt sau bất kỳ return nào
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Hook 2 — cũng luôn được gọi, kể cả khi mounted=false hay open=false.
+  // addEventListener bên trong an toàn vì chỉ chạy sau khi effect thực thi,
+  // tức là đã ở phía client rồi, không ảnh hưởng gì tới SSR.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  if (typeof window === "undefined") return null;
+  // Early return đặt SAU khi tất cả hook đã được khai báo xong —
+  // đảm bảo số lượng hook gọi luôn giống nhau ở mọi lần render
+  if (!mounted) return null;
 
   return createPortal(
     <>
@@ -54,12 +64,12 @@ export default function BaseDrawer({
       open
         ? "translate-x-0 translate-y-0"
         : placement === "right"
-        ? "translate-x-full"
-        : placement === "left"
-        ? "-translate-x-full"
-        : placement === "bottom"
-        ? "translate-y-full"
-        : "-translate-y-full"
+          ? "translate-x-full"
+          : placement === "left"
+            ? "-translate-x-full"
+            : placement === "bottom"
+              ? "translate-y-full"
+              : "-translate-y-full"
     }
   `}
         style={{
@@ -78,10 +88,7 @@ export default function BaseDrawer({
           ) : (
             <div></div>
           )}
-          <button
-            onClick={onClose}
-            className="transition cursor-pointer"
-          >
+          <button onClick={onClose} className="transition cursor-pointer">
             <CloseIcon width={40} height={40} />
           </button>
         </div>

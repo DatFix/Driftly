@@ -1,65 +1,84 @@
-"use server"
+"use server";
 import { db } from "@/configs/firebase.config";
 import { EPostPrivacy } from "@/context/enums/EPostPrivacy.enum";
-import { IBaseCreate, IBaseGetMulti, IBaseGetOne, IBaseUpdate } from "@/interfaces/others/IBaseReturn.interface";
+import {
+  IBaseCreate,
+  IBaseGetMulti,
+  IBaseGetOne,
+  IBaseUpdate,
+} from "@/interfaces/others/IBaseReturn.interface";
 import { IPost } from "@/interfaces/public/IPost.interface";
-import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import { CommentApis, HashtagApis, UserApis } from ".";
 import { now } from "@/utils/now.utils";
 
-export const create = async(data: IPost):Promise<IBaseCreate> => {
-    const now = new Date().toISOString();
+export const create = async (data: IPost): Promise<IBaseCreate> => {
+  const now = new Date().toISOString();
 
-    try {
-      let hashtagData = [] as any;
-      if (Array.isArray(data.hashtags) && data.hashtags.length) {
-          hashtagData = await Promise.all(
-            data.hashtags.map((tag) => HashtagApis.create({ name: tag, popularity: 1 }))
-          );
-      }
-    
-      const res = await addDoc(collection(db, 'posts'), {
-          caption: data.caption ?? '',
-          privacy: data.privacy ?? EPostPrivacy.PUBLIC,
-          bgColor: data.bgColor ?? '',
-          author: data.author,
-          commentsCount: 0,
-          viewsCount: 0,
-          likes: [],
-          images: data.images ?? [],
-          videos: data.videos ?? [],
-          createdAt: now,
-          updatedAt: now,
-          hashtags: hashtagData.map((h: any) => h.data?.id)
-      })
-
-      revalidatePath("/");
-
-      return {
-          data: {id: res.id},
-          statusCode: 201,
-          message: "Tạo bài viết thành công"
-      }
-    } catch (error: any) {
-      console.error("❌ Lỗi khi tạo:", error);
-
-      return{
-          statusCode: 500,
-          message: error?.message || "Lỗi khi tạo bài viết",
-          data: null
-      }
+  try {
+    let hashtagData = [] as any;
+    if (Array.isArray(data.hashtags) && data.hashtags.length) {
+      hashtagData = await Promise.all(
+        data.hashtags.map((tag) =>
+          HashtagApis.create({ name: tag, popularity: 1 }),
+        ),
+      );
     }
-}
+
+    const res = await addDoc(collection(db, "posts"), {
+      caption: data.caption ?? "",
+      privacy: data.privacy ?? EPostPrivacy.PUBLIC,
+      bgColor: data.bgColor ?? "",
+      author: data.author,
+      commentsCount: 0,
+      viewsCount: 0,
+      likes: [],
+      images: data.images ?? [],
+      videos: data.videos ?? [],
+      createdAt: now,
+      updatedAt: now,
+      hashtags: hashtagData.map((h: any) => h.data?.id),
+    });
+
+    revalidatePath("/");
+
+    return {
+      data: { id: res.id },
+      statusCode: 201,
+      message: "Tạo bài viết thành công",
+    };
+  } catch (error: any) {
+    console.error("❌ Lỗi khi tạo:", error);
+
+    return {
+      statusCode: 500,
+      message: error?.message || "Lỗi khi tạo bài viết",
+      data: null,
+    };
+  }
+};
 
 export const getMulti = async (
-  privacy: EPostPrivacy = EPostPrivacy.PUBLIC
+  privacy: EPostPrivacy = EPostPrivacy.PUBLIC,
 ): Promise<IBaseGetMulti> => {
   try {
     const queries = query(
       collection(db, "posts"),
       where("privacy", "==", privacy),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     const querySnapshot = await getDocs(queries);
@@ -70,15 +89,15 @@ export const getMulti = async (
     }));
 
     const postWithAuthor = await Promise.all(
-    posts.map(async (item) => {
-          const author = await UserApis.findOneById(String(item?.author)); // <— SỬA Ở ĐÂY
-          const totalCmt = await CommentApis.getMulti(item?.id ?? ''); // <— SỬA Ở ĐÂY
-          return {
+      posts.map(async (item) => {
+        const author = await UserApis.findOneById(String(item?.author)); // <— SỬA Ở ĐÂY
+        const totalCmt = await CommentApis.getMulti(item?.id ?? ""); // <— SỬA Ở ĐÂY
+        return {
           ...item,
           authorData: author.data || null,
-          commentsCount: totalCmt.totalItems
+          commentsCount: totalCmt.totalItems,
         };
-      })
+      }),
     );
 
     return {
@@ -107,7 +126,7 @@ export const findOneById = async (id: string): Promise<IBaseGetOne> => {
     const post: IPost & { comments: any } = {
       id: docSnap.id,
       ...snapData,
-      comments: comments.data
+      comments: comments.data,
     };
     const author = await UserApis.findOneById(String(post.author));
 
@@ -145,12 +164,12 @@ export const likePost = async (postId: string, userId: string) => {
 
   const liker: ILiker = {
     id: user.data.id,
-    name:  user.data.username!,
-    avatar:  user.data.avatar,
+    name: user.data.username!,
+    avatar: user.data.avatar,
   };
 
   // Kiểm tra user đã like chưa
-  const hasLiked = post.likes?.some(l => l.id === userId);
+  const hasLiked = post.likes?.some((l) => l.id === userId);
 
   // Toggle like: thêm hoặc xóa user khỏi likes
   await updateDoc(postRef, {
@@ -166,27 +185,35 @@ export const likePost = async (postId: string, userId: string) => {
     postId,
     liked: !hasLiked,
     likes: hasLiked
-      ? post.likes?.filter(l => l.id !== userId) || []
+      ? post.likes?.filter((l) => l.id !== userId) || []
       : [...(post.likes || []), liker],
   };
 };
 
 export const updateViewCount = async (postId: string) => {
   try {
-    const docRef = doc(db, 'posts', postId);
+    const docRef = doc(db, "posts", postId);
     const docSnap = await getDoc(docRef);
+
+    // Guard: nếu document không tồn tại (ví dụ id giả từ fake feed),
+    // bỏ qua thay vì crash
+    if (!docSnap.exists()) {
+      console.warn(`⚠️ Post ${postId} không tồn tại, bỏ qua updateViewCount`);
+      return {};
+    }
+
     const post = docSnap.data() as IPost;
     await updateDoc(docRef, {
-      viewsCount: Number(post.viewsCount) + 1,
+      viewsCount: Number(post.viewsCount ?? 0) + 1,
       updatedAt: now(),
-    })
+    });
     revalidatePath("/posts");
     return {};
   } catch (error) {
     console.error("❌ Lỗi khi cập nhật", error);
     throw error;
   }
-}
+};
 
 export const update = async (id: string, data: IPost): Promise<IBaseUpdate> => {
   try {
@@ -196,16 +223,24 @@ export const update = async (id: string, data: IPost): Promise<IBaseUpdate> => {
       updatedAt: now(),
     });
     revalidatePath("/posts");
-    return {data: null, statusCode: 200, message: "Cập nhật bài viết thành công" };
+    return {
+      data: null,
+      statusCode: 200,
+      message: "Cập nhật bài viết thành công",
+    };
   } catch (error) {
     console.error("❌ Lỗi khi cập nhật", error);
-    return {data: null, statusCode: 500, message: "Lỗi khi cập nhật bài viết" };
+    return {
+      data: null,
+      statusCode: 500,
+      message: "Lỗi khi cập nhật bài viết",
+    };
   }
 };
 
 export const getMultiByAuthor = async (
   authorId: string,
-  viewerId: string | null
+  viewerId: string | null,
 ): Promise<IBaseGetMulti> => {
   try {
     let queries;
@@ -218,26 +253,28 @@ export const getMultiByAuthor = async (
       queries = query(
         postsRef,
         where("author", "==", authorId),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
-    } else if(authorData?.data.followers?.some((followerId: any) => followerId === viewerId)) {
+    } else if (
+      authorData?.data.followers?.some(
+        (followerId: any) => followerId === viewerId,
+      )
+    ) {
       // 🟩 2. Người xem đã follow tác giả → lọc theo followers
       queries = query(
         postsRef,
         where("author", "==", authorId),
         where("privacy", "in", [EPostPrivacy.PUBLIC, EPostPrivacy.FOLLOWERS]),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
-
-    } else{
+    } else {
       // 🟩 3. Người xem không phải tác giả → lọc theo privacy
       queries = query(
         postsRef,
         where("author", "==", authorId),
         where("privacy", "==", EPostPrivacy.PUBLIC),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
-
     }
 
     const snapshot = await getDocs(queries);
@@ -258,7 +295,7 @@ export const getMultiByAuthor = async (
           authorData: author.data || null,
           commentsCount: totalCmt.totalItems,
         };
-      })
+      }),
     );
 
     return {
@@ -272,19 +309,19 @@ export const getMultiByAuthor = async (
 };
 
 export const getPostsByFollowings = async (
-  viewerId: string
+  viewerId: string,
 ): Promise<IBaseGetMulti> => {
   try {
     const viewerData = await UserApis.findOneById(viewerId);
     if (!viewerData?.data?.followings?.length) {
       return { data: [], totalItems: 0 };
-    }   
+    }
     const postsRef = collection(db, "posts");
     const queries = query(
-      postsRef, 
+      postsRef,
       where("author", "in", viewerData.data.followings),
-      orderBy("createdAt", "desc")
-    );  
+      orderBy("createdAt", "desc"),
+    );
     const snapshot = await getDocs(queries);
     const posts: IPost[] = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -300,9 +337,9 @@ export const getPostsByFollowings = async (
           authorData: author.data || null,
           commentsCount: totalCmt.totalItems,
         };
-      })
+      }),
     );
-    return {  
+    return {
       data: postWithAuthor,
       totalItems: posts.length,
     };
@@ -312,14 +349,16 @@ export const getPostsByFollowings = async (
   }
 };
 
-export const getPostsByHashtag = async (hashtagId: string): Promise<IBaseGetMulti> => {
+export const getPostsByHashtag = async (
+  hashtagId: string,
+): Promise<IBaseGetMulti> => {
   try {
-    const postsRef = collection(db, 'posts');
+    const postsRef = collection(db, "posts");
 
     const queries = query(
       postsRef,
-      where('hashtags', 'array-contains', hashtagId),
-      orderBy('createdAt', 'desc')
+      where("hashtags", "array-contains", hashtagId),
+      orderBy("createdAt", "desc"),
     );
 
     const snapshot = await getDocs(queries);
@@ -334,7 +373,7 @@ export const getPostsByHashtag = async (hashtagId: string): Promise<IBaseGetMult
       posts.map(async (item) => {
         const [author, totalCmt] = await Promise.all([
           UserApis.findOneById(String(item.author)),
-          CommentApis.getMulti(item.id ?? ''),
+          CommentApis.getMulti(item.id ?? ""),
         ]);
 
         return {
@@ -342,17 +381,15 @@ export const getPostsByHashtag = async (hashtagId: string): Promise<IBaseGetMult
           authorData: author.data || null,
           commentsCount: totalCmt.totalItems || 0,
         };
-      })
+      }),
     );
 
     return {
       data: postWithAuthor,
       totalItems: postWithAuthor.length,
     };
-
   } catch (error: any) {
-    console.error('❌ Error getPostsByHashtag:', error);
+    console.error("❌ Error getPostsByHashtag:", error);
     return { data: [], totalItems: 0 };
   }
 };
-

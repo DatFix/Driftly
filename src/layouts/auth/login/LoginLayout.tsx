@@ -79,7 +79,7 @@ export default function LoginLayout() {
       <div className="relative flex h-screen flex-col items-center justify-center w-full md:w-1/2">
         <button
           className="absolute top-[2%] left-[2%] lg:top-[5%] lg:left-[5%] px-2 py-2 text-(--color-primary) flex items-center justify-center gap-1 font-medium cursor-pointer"
-          onClick={() => router.push("/")}
+          onClick={() => router.back()}
         >
           <div className="block md:hidden">
             <ArrowLeftIcon

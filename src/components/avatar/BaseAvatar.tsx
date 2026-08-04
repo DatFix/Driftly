@@ -13,7 +13,7 @@ export default function BaseAvatar({
 }) {
   return (
     <Avatar
-      className="bg-white"
+      className={`${url ? "bg-white" : "bg-(--color-primary)"} rounded-full`}
       style={{ width: size, height: size }}
     >
       <AvatarImage src={url || ""} alt="avatar" className="object-cover" />

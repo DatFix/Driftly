@@ -15,14 +15,14 @@ export default function ProfileLayout({ item }: { item: IUser }) {
   const { userLogout, user } = useAuth();
   const { clearUserData } = useUserStore();
   const [posts, setPosts] = useState<IPost[]>([]);
-  const [toalPosts, setTotalPosts] = useState<number>(0);
+  const [totalPost, setTotalPosts] = useState<number>(0);
 
   useEffect(() => {
     if (item) {
       async function fetchPosts() {
         const res = await PostApis.getMultiByAuthor(
           String(item?.id),
-          String(user?.id)
+          String(user?.id),
         );
         setPosts(res.data);
         setTotalPosts(res.totalItems);
@@ -104,7 +104,7 @@ export default function ProfileLayout({ item }: { item: IUser }) {
 
   return (
     <div className="max-w-7xl mx-auto min-h-screen">
-      <HeaderProfileLayout item={item} totalItems={toalPosts} />
+      <HeaderProfileLayout item={item} totalItems={totalPost} />
       <MainProfileLayout item={item} posts={posts} />
     </div>
   );

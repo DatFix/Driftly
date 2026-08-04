@@ -4,14 +4,17 @@ import { BgPostContent } from "../commons/BgPostCard";
 import NomalPostCard from "../commons/NomalPostCard";
 import { useState } from "react";
 import { PostApis } from "@/api";
+import { getPostDetailHref } from "@/utils/get-post-detail-href.util";
 
 export default function MainPostCard({ item }: { item: IPost }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
 
   const handleViewPost = async () => {
-    await PostApis.updateViewCount(item?.id!);
-    await router.push(`/post/${item.id}`);
+    if (item.id && !item.id.includes("-")) {
+      await PostApis.updateViewCount(item.id);
+    }
+    await router.push(getPostDetailHref(item));
   };
 
   return (

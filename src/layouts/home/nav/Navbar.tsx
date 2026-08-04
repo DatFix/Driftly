@@ -10,7 +10,7 @@ export default function Navbar() {
     <div className="relative">
       {/* Nav bình thường */}
       <div
-        className={`transition-all duration-500 ease-in-out mb-5 ${
+        className={`transition-all hidden md:block duration-500 ease-in-out mb-5 ${
           isScrolled
             ? "opacity-0 -translate-y-5 pointer-events-none"
             : "opacity-100 translate-y-0"
@@ -24,7 +24,7 @@ export default function Navbar() {
       <div
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
           isScrolled
-            ? "opacity-100 translate-y-0"
+            ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-5 pointer-events-none"
         }`}
       >
